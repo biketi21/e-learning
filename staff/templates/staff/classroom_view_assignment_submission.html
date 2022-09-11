@@ -1,0 +1,125 @@
+{% extends 'administrator/main.html' %}
+{% load static %}
+{% load extra_tags %}
+{% load encrypt_tags %}
+{% block content %}
+  <div class="content-wrapper pb-0">
+    <div class="page-header flex-wrap">
+      <h3 class="mb-0"> {{ course.course }} || View All Assignment Submissions || ({{ ACADEMIC_SESSION }})
+      </h3>
+      </div>
+      
+    <div class="row">
+      <div class="col-xl-12 stretch-card grid-margin">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+                <div class="col-sm-12">
+                  <div class="card mb-3 mb-sm-0">
+                    <div class="card-body py-3 px-4">
+                        <p class="m-0 survey-head">All Submissions - {{ assignment_name }}</p>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                          <table class="table-striped table">
+                            <tr>
+                              <th>SN</th>
+                              <th>Student</th>
+                              <th>Submission Date</th>
+                              <th>Action</th>
+                            </tr>
+                            {% now "Y-m-d" as todays_date %}
+
+                            {% for submission in submissions  %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ submission.student }}</td>
+                                <td>{{ submission.submission_date }}</td>
+                                <td>
+                                  <button class="btn submission btn-secondary" data-name="{{ submission.student }}" data-action='preview' data-id="{{ submission.id }}" >Preview</button>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                          </table>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            
+          
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- main-panel ends -->
+{% endblock content %}
+
+
+
+{% block custom_js %}
+<script>
+  $(function() {
+
+    $(document).on('click', '.submission', function(e) {
+   
+    e.preventDefault();
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    var token = location.pathname.split("/").slice(-4)[0].replace(/^\/|\/$/g, '');
+      var id = $(this).data('id');
+      $.ajax({
+        type: 'GET',
+        url: '{% url "get_student_answer" "token" 123 %}'.replace('token', token).replace(123, id),
+        dataType: 'json',
+        success: function(response) {
+          console.log(response)
+            if (response.error) {
+              swal("Error", "Access Denied", "error");
+                toastr.error(errmsg, "Preview Error")
+            } else {
+                $('#answer_modal').modal('show');
+                $('#submitted_date').html(response.submitted_date)
+                $('#modal_body').html(response.answer);
+                $('#student_name').html(name);
+
+            }
+        }
+    });
+
+    
+
+    
+
+});
+});
+</script>
+{% endblock custom_js %}
+
+{% block modal %}
+<div class="modal fade" id="answer_modal">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title float-left" id='modal_title'><b></b></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+              </div>
+              <div class="modal-body">
+<label for="" class="badge badge-info">Submission Date/Time: </label>
+
+                <div id="submitted_date"></div>
+<hr>
+<label for="" class="badge badge-info"><span id="student_name"></span>'s Answer: </label>
+                <div class="form-group">
+                <span id="modal_body"></span>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock modal %}

@@ -1,0 +1,162 @@
+{% extends 'administrator/main.html' %}
+{% load static %}
+{% load extra_tags %}
+{% load encrypt_tags %}
+{% block content %}
+  <div class="content-wrapper pb-0">
+    <div class="page-header flex-wrap">
+      <h3 class="mb-0"> {{ course.course }} || View All Assignments || ({{ ACADEMIC_SESSION }})
+      </h3>
+      </div>
+      
+    <div class="row">
+      <div class="col-xl-12 stretch-card grid-margin">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+                <div class="col-sm-12">
+                  <div class="card mb-3 mb-sm-0">
+                    <div class="card-body py-3 px-4">
+                        <p class="m-0 survey-head">All Assignments</p>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                          <table class="table-striped table">
+                            <tr>
+                              <th>SN</th>
+                              <th>Title</th>
+                              <th>Submission Date</th>
+                              <th>Status</th>
+                              <th>Action</th>
+                            </tr>
+                            {% now "Y-m-d" as todays_date %}
+
+                            {% for assignment in assignments  %}
+                            {% have_i_submitted request.user.student assignment.id as I_Have_Submitted %}
+                                  {% if not todays_date <= assignment.expiry_date|date:"Y-m-d" and not  I_Have_Submitted %}
+<tr class="table-danger">
+{% else %}
+<tr>
+{% endif %}
+  
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ assignment.title }}</td>
+                                <td>{{ assignment.expiry_date }}</td>
+                                <td>
+                                  
+                                  {% if todays_date <= assignment.expiry_date|date:"Y-m-d" %}
+                                  <label class="badge badge-success">Active</label>
+                                  {% else %}
+                                  <label class="badge badge-danger">Expired</label>
+                                  {% endif %}
+                                  
+                                </td>
+                                <td>
+                               
+                                  {% if I_Have_Submitted %}
+                                  <button class="btn assignment btn-primary" data-action="view" data-id="{{ assignment.id }}" > 
+                                    View Answer
+                                  </button> 
+                                  <label for="" class="text-info">{% when_did_i_submit request.user.student assignment.id %}</label>
+                                  {% else %}
+                                  {% if todays_date <= assignment.expiry_date|date:"Y-m-d" %}
+                                  <button class="btn assignment btn-primary" data-action="submit" data-id="{{ assignment.id }}" > 
+                                    Submit
+                                  </button> 
+
+                                  {% else %}
+                                  <label for="" class="badge badge-danger">You failed to turn in your assignment.</label>
+                                  {% endif %}
+
+                                  {% endif %}
+                                
+                                
+                                </td>
+                              </tr>
+                              {% endfor %}
+                          </table>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            
+          
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- main-panel ends -->
+{% endblock content %}
+
+
+
+{% block custom_js %}
+  <script>
+    $(function() {
+
+      $(document).on('click', '.assignment', function(e) {
+     
+      e.preventDefault();
+      var id = $(this).data('id');
+      var action = $(this).data('action');
+      var token = location.pathname.split("/").slice(-3)[0].replace(/^\/|\/$/g, '');
+      if (action=='submit'){
+        var link = '{% url "studentSubmitAssignments" "token" 123 %}'.replace('token', token).replace(123, id);
+        window.location = link;
+      }else{
+        //Display modal
+        var id = $(this).data('id');
+        $.ajax({
+          type: 'GET',
+          url: '{% url "get_answer" "token" 123 %}'.replace('token', token).replace(123, id),
+          dataType: 'json',
+          success: function(response) {
+            console.log(response)
+              if (response.error) {
+                swal("Error", "Access Denied", "error");
+                  toastr.error(errmsg, "Preview Error")
+              } else {
+                  $('#answer_modal').modal('show');
+                  $('#submitted_date').html(response.submitted_date)
+                  $('#modal_body').html(response.answer);
+              }
+          }
+      });
+
+      }
+
+      
+
+});
+});
+  </script>
+{% endblock custom_js %}
+
+{% block modal %}
+<div class="modal fade" id="answer_modal">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title float-left" id='modal_title'><b></b></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+              </div>
+              <div class="modal-body">
+<label for="" class="badge badge-info">Submission Date/Time: </label>
+
+                <div id="submitted_date"></div>
+<hr>
+<label for="" class="badge badge-info">Your Answer: </label>
+                <div class="form-group">
+                <span id="modal_body"></span>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock modal %}

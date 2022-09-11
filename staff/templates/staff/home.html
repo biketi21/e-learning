@@ -1,0 +1,85 @@
+{% extends 'administrator/main.html' %}
+{% load static %}
+{% block content %}
+  <div class="content-wrapper pb-0">
+    <div class="row">
+      <div class="col-xl-12 stretch-card grid-margin">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-sm-7">
+                <h5>{{ request.user }} - Staff Dashboard</h5>
+                <p class="text-muted"> {% now 'D, d - M, Y - h:i A' %}</a>
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <div class="card mb-3 mb-sm-0 bg-warning">
+                  <div class="card-body py-3 px-4">
+                    <p class="m-0 color-card-head">Assigned Courses</p>
+                    <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                      <div>
+                        <h3 class="m-0 text-white">{{ assigned_courses }}</h3>
+                        <p class="text-white m-0">&nbsp;</p>
+                      </div>
+                      <div id="earningChart" class="flot-chart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="card mb-3 mb-sm-0 bg-success">
+                  <div class="card-body py-3 px-4">
+                    <p class="m-0 color-card-head">No Of Assignments</p>
+                    <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                      <div>
+                        <h3 class="m-0 text-white">{{ all_assignments }}</h3>
+                        <p class="text-white m-0">&nbsp;</p>
+                      </div>
+                      <div id="productChart" class="flot-chart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="card mb-3 mb-sm-0 bg-dark">
+                  <div class="card-body py-3 px-4">
+                    <p class="m-0 text-secondary">Active Assignments</p>
+                    <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                      <div>
+                        <h3 class="m-0 text-white">{{ active_assignments }}</h3>
+                        <p class="text-white m-0">&nbsp;</p>
+                      </div>
+                      <div id="productChart" class="flot-chart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="card">
+                  <div class="card-body py-3 px-4 bg-danger">
+                    <p class="m-0 color-card-head">Active Session</p>
+                    <div class="d-flex justify-content-between align-items-end flot-bar-wrapper">
+                      <div>
+                        <h3 class="m-0 text-white">{{ ACADEMIC_SESSION }}</h3>
+                        <p class="text-white m-0">&nbsp;</p>
+                      </div>
+                      <div id="orderChart" class="flot-chart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row my-3">
+             
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- main-panel ends -->
+{% endblock content %}
+
